@@ -11,9 +11,9 @@ RUN apk add --no-cache curl
 COPY package*.json ./
 COPY client/package*.json ./client/
 
-# Install dependencies
-RUN npm ci --only=production
-RUN cd client && npm ci --only=production
+# Install dependencies (use npm install instead of npm ci for flexibility)
+RUN npm install --only=production
+RUN cd client && npm install --only=production
 
 # Build stage for frontend
 FROM node:18-alpine AS build
@@ -24,9 +24,9 @@ WORKDIR /app
 COPY package*.json ./
 COPY client/package*.json ./client/
 
-# Install all dependencies (including dev)
-RUN npm ci
-RUN cd client && npm ci
+# Install all dependencies (use npm install to handle lock file issues)
+RUN npm install
+RUN cd client && npm install
 
 # Copy source code
 COPY . .
@@ -45,7 +45,7 @@ RUN adduser -S cropeye -u 1001
 
 # Copy package files and install production dependencies
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 
 # Copy built application
 COPY --from=build --chown=cropeye:nodejs /app/server.js ./

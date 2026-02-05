@@ -6,8 +6,7 @@ services:
   cropeye-chatbot:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: production
+      dockerfile: Dockerfile.simple
     container_name: cropeye-chatbot-prod
     ports:
       - "5000:5000"

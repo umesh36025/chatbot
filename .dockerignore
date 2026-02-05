@@ -5,6 +5,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Lock files (to avoid sync issues)
+package-lock.json
+client/package-lock.json
+yarn.lock
+client/yarn.lock
+
 # Production build
 client/build/
 
@@ -67,7 +73,9 @@ instant-fix.sh
 check-system.sh
 fix-styling-error.sh
 stop-servers.sh
+fix-docker-build.sh
 
 # Status files
 STATUS.md
 QUICK_FIX.md
+test-weather.html
