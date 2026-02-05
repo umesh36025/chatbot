@@ -167,12 +167,11 @@ app.get('/api/weather', async (req, res) => {
       return res.json(liveWeatherData);
     }
     
-    // Fallback to simulated data if API fails
-    const simulatedData = getWeatherData(location);
+    // Fallback to simulated data
+    const simulatedData = await getWeatherData(location);
     if (simulatedData) {
       return res.json({
         ...simulatedData,
-        source: 'simulated',
         note: 'Live weather data unavailable, showing simulated data'
       });
     }
@@ -182,17 +181,20 @@ app.get('/api/weather', async (req, res) => {
   } catch (error) {
     console.error('Weather API error:', error);
     
-    // Fallback to simulated data on error
-    const simulatedData = getWeatherData(location);
-    if (simulatedData) {
-      return res.json({
-        ...simulatedData,
-        source: 'simulated',
-        note: 'Live weather API error, showing simulated data'
-      });
-    }
+    // Emergency fallback
+    const emergencyData = {
+      temperature: Math.round(Math.random() * 20 + 15),
+      humidity: Math.round(Math.random() * 40 + 40),
+      windSpeed: Math.round(Math.random() * 15 + 5),
+      visibility: Math.round(Math.random() * 5 + 5),
+      pressure: Math.round(Math.random() * 50 + 1000),
+      description: 'partly cloudy',
+      location: location,
+      source: 'simulated',
+      note: 'Using emergency weather simulation'
+    };
     
-    return res.status(500).json({ error: 'Failed to fetch weather data' });
+    return res.json(emergencyData);
   }
 });
 
@@ -948,16 +950,26 @@ async function getWeatherData(location) {
   
   // Fallback to simulated data
   const locationData = enhancedFarmingKnowledge.weatherPatterns[location.toLowerCase()];
-  if (!locationData) return null;
+  
+  // Generate realistic simulated data
+  const baseTemp = locationData ? locationData.temp : (Math.random() * 20 + 15);
+  const baseHumidity = locationData ? locationData.humidity : (Math.random() * 40 + 40);
   
   return {
-    temperature: locationData.temp,
-    humidity: locationData.humidity,
-    rainfall: locationData.rainfall,
-    season: locationData.season,
-    windSpeed: Math.round(Math.random() * 10 + 5), // 5-15 km/h
+    temperature: Math.round(baseTemp + (Math.random() * 6 - 3)), // ±3°C variation
+    humidity: Math.round(baseHumidity + (Math.random() * 20 - 10)), // ±10% variation
+    windSpeed: Math.round(Math.random() * 15 + 5), // 5-20 km/h
     visibility: Math.round(Math.random() * 5 + 5), // 5-10 km
-    source: 'simulated'
+    pressure: Math.round(Math.random() * 50 + 1000), // 1000-1050 hPa
+    description: ['clear sky', 'few clouds', 'scattered clouds', 'partly cloudy', 'light rain'][Math.floor(Math.random() * 5)],
+    condition: ['Clear', 'Clouds', 'Rain'][Math.floor(Math.random() * 3)],
+    feelsLike: Math.round(baseTemp + (Math.random() * 4 - 2)),
+    cloudiness: Math.round(Math.random() * 100),
+    rainfall: Math.random() > 0.8 ? Math.round(Math.random() * 5) : 0,
+    location: location,
+    country: 'Simulated',
+    source: 'simulated',
+    timestamp: new Date().toISOString()
   };
 }
 

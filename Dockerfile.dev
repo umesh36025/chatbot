@@ -1,0 +1,32 @@
+# CropEye Agentic AI Chatbot - Development Dockerfile
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache curl bash
+
+# Copy package files
+COPY package*.json ./
+COPY client/package*.json ./client/
+
+# Install dependencies
+RUN npm install
+RUN cd client && npm install
+
+# Copy source code
+COPY . .
+
+# Make scripts executable
+RUN chmod +x start.sh fix-connection.sh debug-connection.sh
+
+# Expose ports
+EXPOSE 3000 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:5000/api/health || exit 1
+
+# Start development servers
+CMD ["./start.sh"]
