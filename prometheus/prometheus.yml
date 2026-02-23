@@ -16,7 +16,7 @@ scrape_configs:
     static_configs:
       - targets:
           # REPLACE THIS with your actual Railway app URL
-          - 'https://chatbot-production-a83d.up.railway.app/'
+          - 'chatbot-production-a83d.up.railway.app'
         labels:
           service: 'cropeye-chatbot'
           app: 'backend'
