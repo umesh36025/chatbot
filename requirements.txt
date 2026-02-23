@@ -1,0 +1,26 @@
+# Python Requirements for CropEye AI Chatbot
+# Note: This is primarily a Node.js project
+# This file is for Python-based monitoring or additional services
+
+# Prometheus Client for Python
+prometheus-client==0.19.0
+
+# Optional: If you want to add Python-based services
+# Flask==3.0.0
+# FastAPI==0.109.0
+# uvicorn==0.27.0
+# requests==2.31.0
+# python-dotenv==1.0.0
+
+# Data Processing (if needed)
+# pandas==2.1.4
+# numpy==1.26.3
+
+# Machine Learning (if needed for future features)
+# scikit-learn==1.4.0
+# tensorflow==2.15.0
+
+# Database (if needed)
+# psycopg2-binary==2.9.9
+# pymongo==4.6.1
+# redis==5.0.1

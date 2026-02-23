@@ -216,6 +216,94 @@ CMD ["npm", "start"]
 - Ready for API integration when needed
 - Comprehensive documentation
 
+### ✅ Production Ready
+- Prometheus metrics integration
+- Docker deployment support
+- Railway cloud deployment guide
+- Monitoring with Grafana
+- Python support for additional services
+
+## 📊 Monitoring & Metrics
+
+The application includes built-in Prometheus metrics:
+
+```bash
+# View metrics endpoint
+curl http://localhost:5000/metrics
+
+# Start with monitoring stack
+docker-compose --profile monitoring up -d
+
+# Access Grafana dashboards
+open http://localhost:3001  # admin/admin123
+```
+
+Available metrics:
+- HTTP request counts and duration
+- Chat message counts by intent
+- Weather API call statistics
+- Active user count
+- System metrics (CPU, memory, etc.)
+
+See `MONITORING_SETUP_COMPLETE.md` for full setup guide.
+
+## 🐳 Docker Deployment
+
+```bash
+# Production deployment
+./docker-run.sh prod
+
+# Development with hot reload
+./docker-run.sh dev
+
+# With Nginx reverse proxy
+./docker-run.sh nginx
+
+# Full monitoring stack
+docker-compose --profile monitoring up -d
+```
+
+See `DOCKER_GUIDE.md` for detailed instructions.
+
+## ☁️ Cloud Deployment
+
+Deploy to Railway with one GitHub repository:
+1. App service (Node.js)
+2. Prometheus service
+3. Grafana service
+
+See `RAILWAY_DEPLOYMENT.md` for step-by-step guide.
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| `FINAL_SETUP_SUMMARY.md` | Complete project overview and setup |
+| `QUICK_COMMANDS.md` | Quick reference for all commands |
+| `INSTALLATION_GUIDE.md` | Detailed installation instructions |
+| `HOW_TO_RUN.md` | Running the application |
+| `DOCKER_GUIDE.md` | Docker deployment guide |
+| `RAILWAY_DEPLOYMENT.md` | Cloud deployment guide |
+| `MONITORING_SETUP_COMPLETE.md` | Monitoring setup and configuration |
+| `WEATHER_API_SETUP.md` | Weather API configuration |
+| `TROUBLESHOOTING.md` | Common issues and solutions |
+| `STATUS.md` | Current system status |
+
+## 🔧 Validation
+
+Run the validation script to check your setup:
+
+```bash
+./validate-setup.sh
+```
+
+This checks:
+- All required files and directories
+- System dependencies
+- Port availability
+- Node.js packages
+- Configuration files
+
 ## 🔮 Future Enhancements
 
 When you're ready to add external APIs:

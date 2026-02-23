@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const promClient = require('prom-client');
 require('dotenv').config();
 
 const app = express();
@@ -14,6 +15,85 @@ app.use(express.static('client/build'));
 // Weather API configuration
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const WEATHER_API_BASE = 'https://api.openweathermap.org/data/2.5';
+
+// ============================================
+// PROMETHEUS METRICS SETUP
+// ============================================
+
+// Create a Registry to register metrics
+const register = new promClient.Registry();
+
+// Add default metrics (CPU, memory, etc.)
+promClient.collectDefaultMetrics({ register });
+
+// Custom metrics
+const httpRequestsTotal = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code'],
+  registers: [register]
+});
+
+const httpRequestDuration = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  registers: [register]
+});
+
+const chatMessagesTotal = new promClient.Counter({
+  name: 'chat_messages_total',
+  help: 'Total number of chat messages processed',
+  labelNames: ['intent'],
+  registers: [register]
+});
+
+const weatherApiCallsTotal = new promClient.Counter({
+  name: 'weather_api_calls_total',
+  help: 'Total number of weather API calls',
+  labelNames: ['source', 'status'],
+  registers: [register]
+});
+
+const activeUsers = new promClient.Gauge({
+  name: 'active_users',
+  help: 'Number of active users',
+  registers: [register]
+});
+
+// Middleware to track request metrics
+app.use((req, res, next) => {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+    const route = req.route ? req.route.path : req.path;
+    
+    httpRequestsTotal.inc({
+      method: req.method,
+      route: route,
+      status_code: res.statusCode
+    });
+    
+    httpRequestDuration.observe({
+      method: req.method,
+      route: route,
+      status_code: res.statusCode
+    }, duration);
+  });
+  
+  next();
+});
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+// ============================================
+// END PROMETHEUS METRICS SETUP
+// ============================================
 
 // Farming knowledge base
 const farmingKnowledge = {
@@ -205,6 +285,9 @@ app.post('/api/chat', async (req, res) => {
     
     // Analyze user intent
     const intent = await analyzeIntent(message);
+    
+    // Track chat message metric
+    chatMessagesTotal.inc({ intent: intent.type });
     
     let response = '';
     let additionalData = {};
@@ -431,6 +514,7 @@ async function handleSoilQuery(crop, location) {
 async function fetchLiveWeatherData(location) {
   if (!WEATHER_API_KEY) {
     console.log('Weather API key not configured, using simulated data');
+    weatherApiCallsTotal.inc({ source: 'simulated', status: 'skipped' });
     return null;
   }
 
@@ -445,6 +529,9 @@ async function fetchLiveWeatherData(location) {
     });
 
     const data = response.data;
+    
+    // Track successful API call
+    weatherApiCallsTotal.inc({ source: 'live', status: 'success' });
     
     return {
       temperature: Math.round(data.main.temp),
@@ -466,6 +553,7 @@ async function fetchLiveWeatherData(location) {
     };
   } catch (error) {
     console.error('Live weather API error:', error.message);
+    weatherApiCallsTotal.inc({ source: 'live', status: 'error' });
     return null;
   }
 }
